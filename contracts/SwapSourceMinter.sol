@@ -69,6 +69,7 @@ contract SwapSourceMinter is Withdraw {
 
     function mint(
         uint64 destinationChainSelector,
+        address nftAddress, // NFT contract address
         address receiver,
         PayFeesIn payFeesIn,
         uint256 ghoAmount // Amount of GHO to swap
@@ -79,7 +80,7 @@ contract SwapSourceMinter is Withdraw {
         // Construct the CCIP message
         Client.EVM2AnyMessage memory message = Client.EVM2AnyMessage({
             receiver: abi.encode(receiver),
-            data: abi.encodeWithSignature("mint(address)", msg.sender),
+            data: abi.encodeWithSignature("mint(address,bytes)", nftAddress, abi.encodeWithSignature("mint(address)", msg.sender)),
             tokenAmounts: new Client.EVMTokenAmount[](0),
             extraArgs: "",
             feeToken: payFeesIn == PayFeesIn.LINK ? i_link : address(0)
