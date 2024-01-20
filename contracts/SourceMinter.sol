@@ -2,6 +2,8 @@
 pragma solidity 0.8.19;
 
 import {LinkTokenInterface} from "@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface.sol";
+import '@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol';
+import '@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol';
 import {IRouterClient} from "@chainlink/contracts-ccip/src/v0.8/ccip/interfaces/IRouterClient.sol";
 import {Client} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.sol";
 import {Withdraw} from "./utils/Withdraw.sol";
@@ -32,9 +34,15 @@ contract SourceMinter is Withdraw {
 
     function mint(
         uint64 destinationChainSelector,
+        address nftAddress, // NFT contract address
         address receiver,
         PayFeesIn payFeesIn
     ) external {
+        bytes memory encodedData = abi.encodeWithSignature(
+            "mint(address,bytes)", 
+            nftAddress, 
+            abi.encodeWithSignature("mint(address)", msg.sender)
+        );
         Client.EVM2AnyMessage memory message = Client.EVM2AnyMessage({
             receiver: abi.encode(receiver),
             data: abi.encodeWithSignature("mint(address)", msg.sender),

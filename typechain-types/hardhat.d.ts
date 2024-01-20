@@ -58,10 +58,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.LinkTokenInterface__factory>;
     getContractFactory(
-      name: "LinkTokenInterface",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.LinkTokenInterface__factory>;
-    getContractFactory(
       name: "Ownable",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Ownable__factory>;
@@ -166,11 +162,6 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.LinkTokenInterface>;
     getContractAt(
-      name: "LinkTokenInterface",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.LinkTokenInterface>;
-    getContractAt(
       name: "Ownable",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -276,10 +267,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.LinkTokenInterface>;
     deployContract(
-      name: "LinkTokenInterface",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.LinkTokenInterface>;
-    deployContract(
       name: "Ownable",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.Ownable>;
@@ -378,11 +365,6 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IERC165>;
-    deployContract(
-      name: "LinkTokenInterface",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.LinkTokenInterface>;
     deployContract(
       name: "LinkTokenInterface",
       args: any[],

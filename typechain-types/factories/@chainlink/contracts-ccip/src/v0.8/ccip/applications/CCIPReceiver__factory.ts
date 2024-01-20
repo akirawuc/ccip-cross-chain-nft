@@ -2,8 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import { Contract, Signer, utils } from "ethers";
-import type { Provider } from "@ethersproject/providers";
+import { Contract, Interface, type ContractRunner } from "ethers";
 import type {
   CCIPReceiver,
   CCIPReceiverInterface,
@@ -110,12 +109,12 @@ const _abi = [
 export class CCIPReceiver__factory {
   static readonly abi = _abi;
   static createInterface(): CCIPReceiverInterface {
-    return new utils.Interface(_abi) as CCIPReceiverInterface;
+    return new Interface(_abi) as CCIPReceiverInterface;
   }
   static connect(
     address: string,
-    signerOrProvider: Signer | Provider
+    runner?: ContractRunner | null
   ): CCIPReceiver {
-    return new Contract(address, _abi, signerOrProvider) as CCIPReceiver;
+    return new Contract(address, _abi, runner) as unknown as CCIPReceiver;
   }
 }

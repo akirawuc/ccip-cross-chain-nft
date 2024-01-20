@@ -1,29 +1,39 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-import {CCIPReceiver} from "@chainlink/contracts-ccip/src/v0.8/ccip/applications/CCIPReceiver.sol";
-import {Client} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.sol";
-import {MyNFT} from "./MyNFT.sol";
+import "@chainlink/contracts-ccip/src/v0.8/ccip/applications/CCIPReceiver.sol";
+import "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol" as OZIERC721;
 
 /**
- * THIS IS AN EXAMPLE CONTRACT THAT USES HARDCODED VALUES FOR CLARITY.
- * THIS IS AN EXAMPLE CONTRACT THAT USES UN-AUDITED CODE.
- * DO NOT USE THIS CODE IN PRODUCTION.
+ * Example contract using CCIPReceiver for cross-chain NFT minting.
+ * Note: This is for demonstration and not audited for production use.
  */
 contract DestinationMinter is CCIPReceiver {
-    MyNFT nft;
+    // Event declaration with an address parameter
+    event MintCallSuccessful(address indexed nftAddress);
 
-    event MintCallSuccessfull();
+    // Correctly checksummed address
+    address private router = 0x2a9C5afB0d0e4BAb2BCdaE109EC4b0c4Be15a165;
 
-    constructor(address router, address nftAddress) CCIPReceiver(router) {
-        nft = MyNFT(nftAddress);
-    }
+    /**
+     * @dev Constructor for DestinationMinter.
+     */
+    constructor() CCIPReceiver(router) {}
 
-    function _ccipReceive(
-        Client.Any2EVMMessage memory message
-    ) internal override {
-        (bool success, ) = address(nft).call(message.data);
-        require(success);
-        emit MintCallSuccessfull();
+    /**
+     * @dev Overridden function to handle incoming CCIP messages.
+     * @param message The message containing data for NFT minting.
+     */
+    function _ccipReceive(Client.Any2EVMMessage memory message) internal override {
+        // Decode the message to extract the NFT address and the minting data
+        (address nftAddress, bytes memory mintData) = abi.decode(message.data, (address, bytes));
+        OZIERC721.IERC721 nft = OZIERC721.IERC721(nftAddress);
+
+        // Call the mint function of the NFT contract
+        (bool success, ) = address(nft).call(mintData);
+        require(success, "NFT minting failed");
+
+        emit MintCallSuccessful(nftAddress);
     }
 }

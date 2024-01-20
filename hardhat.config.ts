@@ -36,7 +36,7 @@ const config: HardhatUserConfig = {
     arbitrumTestnet: {
       url: ARBITRUM_TESTNET_RPC_URL !== undefined ? ARBITRUM_TESTNET_RPC_URL : '',
       accounts: PRIVATE_KEY !== undefined ? [PRIVATE_KEY] : [],
-      chainId: 421613
+      chainId: 421614
     },
     avalancheFuji: {
       url: AVALANCHE_FUJI_RPC_URL !== undefined ? AVALANCHE_FUJI_RPC_URL : '',

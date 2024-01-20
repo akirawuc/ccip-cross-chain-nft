@@ -33,7 +33,7 @@ task(`deploy-destination-minter`, `Deploys MyNFT.sol and DestinationMinter.sol s
         console.log(`ℹ️  Attempting to deploy DestinationMinter smart contract on the ${hre.network.name} blockchain using ${deployer.address} address, with the Router address ${routerAddress} provided as constructor argument`);
         spinner.start();
 
-        const destinationMinter: DestinationMinter = await hre.ethers.deployContract("DestinationMinter", [routerAddress, myNft.getAddress()]);
+        const destinationMinter: DestinationMinter = await hre.ethers.deployContract("DestinationMinter");
         await destinationMinter.waitForDeployment();
 
 

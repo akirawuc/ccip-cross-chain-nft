@@ -33,8 +33,10 @@ task(`cross-chain-mint`, `Mints the new NFT by sending the Cross-Chain Message`)
         console.log(`ℹ️  Attempting to call the mint function of the SourceMinter.sol smart contract on the ${sourceBlockchain} from ${signer.address} account`);
         spinner.start();
 
+        const nftAddress = "0xfE5b74e9d65B800aAfaDE81B21580D05a53252Ec";
         const tx = await sourceMinterContract.mint(
             destinationChainSelector,
+            nftAddress, // Pass the NFT address
             destinationMinter,
             fees
         );

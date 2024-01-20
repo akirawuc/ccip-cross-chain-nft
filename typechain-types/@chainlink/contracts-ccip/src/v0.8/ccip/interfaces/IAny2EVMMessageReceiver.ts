@@ -3,66 +3,60 @@
 /* eslint-disable */
 import type {
   BaseContract,
-  BigNumber,
   BigNumberish,
   BytesLike,
-  CallOverrides,
-  ContractTransaction,
-  Overrides,
-  PopulatedTransaction,
-  Signer,
-  utils,
+  FunctionFragment,
+  Result,
+  Interface,
+  AddressLike,
+  ContractRunner,
+  ContractMethod,
+  Listener,
 } from "ethers";
-import type { FunctionFragment, Result } from "@ethersproject/abi";
-import type { Listener, Provider } from "@ethersproject/providers";
 import type {
-  TypedEventFilter,
-  TypedEvent,
+  TypedContractEvent,
+  TypedDeferredTopicFilter,
+  TypedEventLog,
   TypedListener,
-  OnEvent,
-  PromiseOrValue,
+  TypedContractMethod,
 } from "../../../../../../common";
 
 export declare namespace Client {
   export type EVMTokenAmountStruct = {
-    token: PromiseOrValue<string>;
-    amount: PromiseOrValue<BigNumberish>;
+    token: AddressLike;
+    amount: BigNumberish;
   };
 
-  export type EVMTokenAmountStructOutput = [string, BigNumber] & {
+  export type EVMTokenAmountStructOutput = [token: string, amount: bigint] & {
     token: string;
-    amount: BigNumber;
+    amount: bigint;
   };
 
   export type Any2EVMMessageStruct = {
-    messageId: PromiseOrValue<BytesLike>;
-    sourceChainSelector: PromiseOrValue<BigNumberish>;
-    sender: PromiseOrValue<BytesLike>;
-    data: PromiseOrValue<BytesLike>;
+    messageId: BytesLike;
+    sourceChainSelector: BigNumberish;
+    sender: BytesLike;
+    data: BytesLike;
     destTokenAmounts: Client.EVMTokenAmountStruct[];
   };
 
   export type Any2EVMMessageStructOutput = [
-    string,
-    BigNumber,
-    string,
-    string,
-    Client.EVMTokenAmountStructOutput[]
+    messageId: string,
+    sourceChainSelector: bigint,
+    sender: string,
+    data: string,
+    destTokenAmounts: Client.EVMTokenAmountStructOutput[]
   ] & {
     messageId: string;
-    sourceChainSelector: BigNumber;
+    sourceChainSelector: bigint;
     sender: string;
     data: string;
     destTokenAmounts: Client.EVMTokenAmountStructOutput[];
   };
 }
 
-export interface IAny2EVMMessageReceiverInterface extends utils.Interface {
-  functions: {
-    "ccipReceive((bytes32,uint64,bytes,bytes,(address,uint256)[]))": FunctionFragment;
-  };
-
-  getFunction(nameOrSignatureOrTopic: "ccipReceive"): FunctionFragment;
+export interface IAny2EVMMessageReceiverInterface extends Interface {
+  getFunction(nameOrSignature: "ccipReceive"): FunctionFragment;
 
   encodeFunctionData(
     functionFragment: "ccipReceive",
@@ -73,68 +67,68 @@ export interface IAny2EVMMessageReceiverInterface extends utils.Interface {
     functionFragment: "ccipReceive",
     data: BytesLike
   ): Result;
-
-  events: {};
 }
 
 export interface IAny2EVMMessageReceiver extends BaseContract {
-  connect(signerOrProvider: Signer | Provider | string): this;
-  attach(addressOrName: string): this;
-  deployed(): Promise<this>;
+  connect(runner?: ContractRunner | null): IAny2EVMMessageReceiver;
+  waitForDeployment(): Promise<this>;
 
   interface: IAny2EVMMessageReceiverInterface;
 
-  queryFilter<TEvent extends TypedEvent>(
-    event: TypedEventFilter<TEvent>,
+  queryFilter<TCEvent extends TypedContractEvent>(
+    event: TCEvent,
     fromBlockOrBlockhash?: string | number | undefined,
     toBlock?: string | number | undefined
-  ): Promise<Array<TEvent>>;
+  ): Promise<Array<TypedEventLog<TCEvent>>>;
+  queryFilter<TCEvent extends TypedContractEvent>(
+    filter: TypedDeferredTopicFilter<TCEvent>,
+    fromBlockOrBlockhash?: string | number | undefined,
+    toBlock?: string | number | undefined
+  ): Promise<Array<TypedEventLog<TCEvent>>>;
 
-  listeners<TEvent extends TypedEvent>(
-    eventFilter?: TypedEventFilter<TEvent>
-  ): Array<TypedListener<TEvent>>;
-  listeners(eventName?: string): Array<Listener>;
-  removeAllListeners<TEvent extends TypedEvent>(
-    eventFilter: TypedEventFilter<TEvent>
-  ): this;
-  removeAllListeners(eventName?: string): this;
-  off: OnEvent<this>;
-  on: OnEvent<this>;
-  once: OnEvent<this>;
-  removeListener: OnEvent<this>;
+  on<TCEvent extends TypedContractEvent>(
+    event: TCEvent,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
+  on<TCEvent extends TypedContractEvent>(
+    filter: TypedDeferredTopicFilter<TCEvent>,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
 
-  functions: {
-    ccipReceive(
-      message: Client.Any2EVMMessageStruct,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-  };
+  once<TCEvent extends TypedContractEvent>(
+    event: TCEvent,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
+  once<TCEvent extends TypedContractEvent>(
+    filter: TypedDeferredTopicFilter<TCEvent>,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
 
-  ccipReceive(
-    message: Client.Any2EVMMessageStruct,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
+  listeners<TCEvent extends TypedContractEvent>(
+    event: TCEvent
+  ): Promise<Array<TypedListener<TCEvent>>>;
+  listeners(eventName?: string): Promise<Array<Listener>>;
+  removeAllListeners<TCEvent extends TypedContractEvent>(
+    event?: TCEvent
+  ): Promise<this>;
 
-  callStatic: {
-    ccipReceive(
-      message: Client.Any2EVMMessageStruct,
-      overrides?: CallOverrides
-    ): Promise<void>;
-  };
+  ccipReceive: TypedContractMethod<
+    [message: Client.Any2EVMMessageStruct],
+    [void],
+    "nonpayable"
+  >;
+
+  getFunction<T extends ContractMethod = ContractMethod>(
+    key: string | FunctionFragment
+  ): T;
+
+  getFunction(
+    nameOrSignature: "ccipReceive"
+  ): TypedContractMethod<
+    [message: Client.Any2EVMMessageStruct],
+    [void],
+    "nonpayable"
+  >;
 
   filters: {};
-
-  estimateGas: {
-    ccipReceive(
-      message: Client.Any2EVMMessageStruct,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-  };
-
-  populateTransaction: {
-    ccipReceive(
-      message: Client.Any2EVMMessageStruct,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-  };
 }

@@ -28,8 +28,8 @@ export type { IERC20 } from "./@chainlink/contracts-ccip/src/v0.8/vendor/openzep
 export { IERC20__factory } from "./factories/@chainlink/contracts-ccip/src/v0.8/vendor/openzeppelin-solidity/v4.8.0/token/ERC20/IERC20__factory";
 export type { IERC165 } from "./@chainlink/contracts-ccip/src/v0.8/vendor/openzeppelin-solidity/v4.8.0/utils/introspection/IERC165";
 export { IERC165__factory } from "./factories/@chainlink/contracts-ccip/src/v0.8/vendor/openzeppelin-solidity/v4.8.0/utils/introspection/IERC165__factory";
-export type { LinkTokenInterface } from "./@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface";
-export { LinkTokenInterface__factory } from "./factories/@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface__factory";
+export type { LinkTokenInterface } from "./@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface";
+export { LinkTokenInterface__factory } from "./factories/@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface__factory";
 export type { Ownable } from "./@openzeppelin/contracts/access/Ownable";
 export { Ownable__factory } from "./factories/@openzeppelin/contracts/access/Ownable__factory";
 export type { ERC721 } from "./@openzeppelin/contracts/token/ERC721/ERC721";
