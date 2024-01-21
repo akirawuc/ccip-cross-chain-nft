@@ -6,7 +6,7 @@ import { SwapSourceMinter, SwapSourceMinter__factory } from "../typechain-types"
 import { Spinner } from "../utils/spinner";
 import { LINK_ADDRESSES, UNISWAP_ROUTER_ADDRESS } from "./constants";
 
-task(`deploy-source-minter`, `Deploys SwapSourceMinter.sol smart contract`)
+task(`deploy-swap`, `Deploys SwapSourceMinter.sol smart contract`)
     .addOptionalParam(`router`, `The address of the Router contract on the source blockchain`)
     .addOptionalParam(`uniswapRouter`, `The address of the Uniswap V3 Router contract`)
     .setAction(async (taskArguments: TaskArguments, hre: HardhatRuntimeEnvironment) => {
@@ -27,9 +27,10 @@ task(`deploy-source-minter`, `Deploys SwapSourceMinter.sol smart contract`)
         spinner.start();
 
         const swapSourceMinterFactory: SwapSourceMinter__factory = await hre.ethers.getContractFactory('SwapSourceMinter') as SwapSourceMinter__factory;
-        const swapSourceMinter: SwapSourceMinter = await swapSourceMinterFactory.deploy(routerAddress, linkAddress, uniswapRouterAddress);
-        await swapSourceMinter.deployed();
+        const swapSourceMinter: SwapSourceMinter = await hre.ethers.deployContract("SwapSourceMinter", [routerAddress, linkAddress, uniswapRouterAddress]);
+        await swapSourceMinter.waitForDeployment();
+
 
         spinner.stop();
-        console.log(`✅ SourceMinter contract deployed at address ${swapSourceMinter.address} on the ${hre.network.name} blockchain`);
+        console.log(`✅ SourceMinter contract deployed at address ${swapSourceMinter.target} on the ${hre.network.name} blockchain`);
     });

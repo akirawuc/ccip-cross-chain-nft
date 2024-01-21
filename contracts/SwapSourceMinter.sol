@@ -13,6 +13,20 @@ interface IWETH {
     function withdraw(uint256 wad) external;
 }
 
+interface IERC20Permit is IERC20 {
+    function permit(
+        address owner,
+        address spender,
+        uint256 value,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external;
+
+    function nonces(address owner) external view returns (uint256);
+}
+
 contract SwapSourceMinter is Withdraw {
     enum PayFeesIn {
         Native,
@@ -23,6 +37,7 @@ contract SwapSourceMinter is Withdraw {
     address immutable i_link;
     address private immutable ghoTokenAddress = 0xc4bF5CbDaBE595361438F8c6a187bDc330539c60;
     address private immutable wethAddress = 0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14;
+    address private immutable uniswapRouterAddress = 0x3fC91A3afd70395Cd496C647d5a6CC9D4B2b7FAD;
     ISwapRouter public immutable swapRouter;
     uint24 public constant poolFee = 3000; // Pool fee tier (0.3%)
 
@@ -41,6 +56,16 @@ contract SwapSourceMinter is Withdraw {
 
     receive() external payable {}
 
+    function permitGHO(
+        uint256 value,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external {
+        IERC20Permit(ghoTokenAddress).permit(msg.sender, uniswapRouterAddress, value, deadline, v, r, s);
+    }
+
     function swapGHOForETH(uint256 amountIn) private returns (uint256 amountOut) {
         // Transfer GHO tokens to this contract
         TransferHelper.safeTransferFrom(ghoTokenAddress, msg.sender, address(this), amountIn);
@@ -53,10 +78,10 @@ contract SwapSourceMinter is Withdraw {
                 tokenIn: ghoTokenAddress,
                 tokenOut: wethAddress,
                 fee: poolFee,
-                recipient: address(this),
+                recipient: msg.sender,
                 deadline: block.timestamp,
                 amountIn: amountIn,
-                amountOutMinimum: 0, // Set to a reasonable minimum in production
+                amountOutMinimum: 0,
                 sqrtPriceLimitX96: 0
             });
 
@@ -64,7 +89,35 @@ contract SwapSourceMinter is Withdraw {
         amountOut = swapRouter.exactInputSingle(params);
 
         // Unwrap WETH to ETH
-        IWETH(wethAddress).withdraw(amountOut);
+        // IWETH(wethAddress).withdraw(amountOut);
+    }
+
+    function testSwapGHOForETH(
+        uint256 amountIn
+    ) public {
+        swapGHOForETH(amountIn);
+    }
+
+    function testPermitSwapGHOForETH(
+        uint256 amountIn,
+        uint256 value,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) public {
+        IERC20Permit(ghoTokenAddress).permit(msg.sender, uniswapRouterAddress, value, deadline, v, r, s);
+        swapGHOForETH(amountIn);
+    }
+
+    function testPermit(
+        uint256 value,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) public {
+        IERC20Permit(ghoTokenAddress).permit(msg.sender, uniswapRouterAddress, value, deadline, v, r, s);
     }
 
     function mint(
