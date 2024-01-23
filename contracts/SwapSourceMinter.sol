@@ -35,9 +35,9 @@ contract SwapSourceMinter is Withdraw {
 
     address immutable i_router;
     address immutable i_link;
-    address private immutable ghoTokenAddress = 0xc4bF5CbDaBE595361438F8c6a187bDc330539c60;
-    address private immutable wethAddress = 0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14;
-    address private immutable uniswapRouterAddress = 0x3fC91A3afd70395Cd496C647d5a6CC9D4B2b7FAD;
+    address public constant ghoTokenAddress = 0xc4bF5CbDaBE595361438F8c6a187bDc330539c60;
+    address public constant wethAddress = 0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14;
+    address public constant uniswapRouterAddress = 0x3fC91A3afd70395Cd496C647d5a6CC9D4B2b7FAD;
     ISwapRouter public immutable swapRouter;
     uint24 public constant poolFee = 3000; // Pool fee tier (0.3%)
 
@@ -63,8 +63,14 @@ contract SwapSourceMinter is Withdraw {
         bytes32 r,
         bytes32 s
     ) external {
-        IERC20Permit(ghoTokenAddress).permit(msg.sender, uniswapRouterAddress, value, deadline, v, r, s);
+        IERC20Permit(ghoTokenAddress).permit(msg.sender, address(this), value, deadline, v, r, s);
     }
+
+    function testTransferFrom(uint256 amountIn) public {
+        // Transfer GHO tokens to this contract
+        TransferHelper.safeTransferFrom(ghoTokenAddress, msg.sender, address(this), amountIn);
+    }
+
 
     function swapGHOForETH(uint256 amountIn) private returns (uint256 amountOut) {
         // Transfer GHO tokens to this contract
@@ -106,7 +112,7 @@ contract SwapSourceMinter is Withdraw {
         bytes32 r,
         bytes32 s
     ) public {
-        IERC20Permit(ghoTokenAddress).permit(msg.sender, uniswapRouterAddress, value, deadline, v, r, s);
+        IERC20Permit(ghoTokenAddress).permit(msg.sender, address(this), value, deadline, v, r, s);
         swapGHOForETH(amountIn);
     }
 
@@ -117,7 +123,7 @@ contract SwapSourceMinter is Withdraw {
         bytes32 r,
         bytes32 s
     ) public {
-        IERC20Permit(ghoTokenAddress).permit(msg.sender, uniswapRouterAddress, value, deadline, v, r, s);
+        IERC20Permit(ghoTokenAddress).permit(msg.sender, address(this), value, deadline, v, r, s);
     }
 
     function mint(
@@ -132,7 +138,7 @@ contract SwapSourceMinter is Withdraw {
         bytes32 s
 
     ) external {
-        IERC20Permit(ghoTokenAddress).permit(msg.sender, uniswapRouterAddress, ghoAmount, deadline, v, r, s);
+        IERC20Permit(ghoTokenAddress).permit(msg.sender, address(this), ghoAmount, deadline, v, r, s);
         // Swap GHO for ETH
         swapGHOForETH(ghoAmount);
 
