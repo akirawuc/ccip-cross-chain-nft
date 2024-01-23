@@ -89,7 +89,7 @@ contract SwapSourceMinter is Withdraw {
         amountOut = swapRouter.exactInputSingle(params);
 
         // Unwrap WETH to ETH
-        // IWETH(wethAddress).withdraw(amountOut);
+        IWETH(wethAddress).withdraw(amountOut);
     }
 
     function testSwapGHOForETH(
@@ -125,8 +125,14 @@ contract SwapSourceMinter is Withdraw {
         address nftAddress, // NFT contract address
         address receiver,
         PayFeesIn payFeesIn,
-        uint256 ghoAmount // Amount of GHO to swap
+        uint256 ghoAmount, // Amount of GHO to swap
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+
     ) external {
+        IERC20Permit(ghoTokenAddress).permit(msg.sender, uniswapRouterAddress, ghoAmount, deadline, v, r, s);
         // Swap GHO for ETH
         swapGHOForETH(ghoAmount);
 

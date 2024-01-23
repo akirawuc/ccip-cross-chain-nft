@@ -24,7 +24,7 @@ export const LINK_ADDRESSES: AddressMap = {
 
 export const routerConfig = {
     ethereumSepolia: {
-        address: `0xd0daae2231e9cb96b94c8512223533293c3693bf`,
+        address: `0x0BF3dE8c5D3e8A2B34D2BEeB17ABfCeBaf363A59`,
         chainSelector: `16015286601757825753`,
         feeTokens: [LINK_ADDRESSES[`ethereumSepolia`], `0x097D90c9d3E0B50Ca60e1ae45F6A81010f9FB534`]
     },
