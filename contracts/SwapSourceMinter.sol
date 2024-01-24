@@ -33,10 +33,14 @@ contract SwapSourceMinter is Withdraw {
         LINK
     }
 
+    ISwapRouter constant router = ISwapRouter(0x3fC91A3afd70395Cd496C647d5a6CC9D4B2b7FAD);
+
     address immutable i_router;
     address immutable i_link;
     address public constant ghoTokenAddress = 0xc4bF5CbDaBE595361438F8c6a187bDc330539c60;
+    IERC20Permit public constant ghoToken = IERC20Permit(ghoTokenAddress);
     address public constant wethAddress = 0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14;
+    IERC20Permit public constant weth = IERC20Permit(wethAddress);
     address public constant uniswapRouterAddress = 0x3fC91A3afd70395Cd496C647d5a6CC9D4B2b7FAD;
     ISwapRouter public immutable swapRouter;
     uint24 public constant poolFee = 3000; // Pool fee tier (0.3%)
@@ -44,33 +48,17 @@ contract SwapSourceMinter is Withdraw {
     event MessageSent(bytes32 messageId);
 
     constructor(
-        address router, 
+        address router1, 
         address link, 
-        address _swapRouter
+        ISwapRouter _swapRouter
     ) {
-        i_router = router;
+        i_router = router1;
         i_link = link;
-        swapRouter = ISwapRouter(_swapRouter);
+        swapRouter = _swapRouter;
         LinkTokenInterface(i_link).approve(i_router, type(uint256).max);
     }
 
     receive() external payable {}
-
-    function permitGHO(
-        uint256 value,
-        uint256 deadline,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) external {
-        IERC20Permit(ghoTokenAddress).permit(msg.sender, address(this), value, deadline, v, r, s);
-    }
-
-    function testTransferFrom(uint256 amountIn) public {
-        // Transfer GHO tokens to this contract
-        TransferHelper.safeTransferFrom(ghoTokenAddress, msg.sender, address(this), amountIn);
-    }
-
 
     function swapGHOForETH(uint256 amountIn) private returns (uint256 amountOut) {
         // Transfer GHO tokens to this contract
@@ -98,33 +86,79 @@ contract SwapSourceMinter is Withdraw {
         IWETH(wethAddress).withdraw(amountOut);
     }
 
-    function testSwapGHOForETH(
-        uint256 amountIn
-    ) public {
-        swapGHOForETH(amountIn);
-    }
-
     function testPermitSwapGHOForETH(
         uint256 amountIn,
-        uint256 value,
         uint256 deadline,
         uint8 v,
         bytes32 r,
         bytes32 s
     ) public {
-        IERC20Permit(ghoTokenAddress).permit(msg.sender, address(this), value, deadline, v, r, s);
-        swapGHOForETH(amountIn);
+        ghoToken.permit(msg.sender, address(this), amountIn, deadline, v, r, s);
+        TransferHelper.safeTransferFrom(ghoTokenAddress, msg.sender, address(this), amountIn);
+
+        // Approve the router to spend GHO
+        TransferHelper.safeApprove(ghoTokenAddress, address(swapRouter), amountIn);
+
     }
 
-    function testPermit(
-        uint256 value,
+    function testPermitSwapGHOForETH2(
+        uint256 amountIn,
         uint256 deadline,
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) public {
-        IERC20Permit(ghoTokenAddress).permit(msg.sender, address(this), value, deadline, v, r, s);
+    ) public returns (uint256 amountOut) {
+        ghoToken.permit(msg.sender, address(this), amountIn, deadline, v, r, s);
+        TransferHelper.safeTransferFrom(ghoTokenAddress, msg.sender, address(this), amountIn);
+        TransferHelper.safeApprove(ghoTokenAddress, address(swapRouter), amountIn);
+
+        // Approve the router to spend GHO
+        ISwapRouter.ExactInputSingleParams memory params =
+            ISwapRouter.ExactInputSingleParams({
+                tokenIn: ghoTokenAddress,
+                tokenOut: wethAddress,
+                fee: poolFee,
+                recipient: address(this),
+                deadline: block.timestamp,
+                amountIn: amountIn,
+                amountOutMinimum: 0,
+                sqrtPriceLimitX96: 0
+            });
+
+        // Execute the swap to get WETH
+        amountOut = swapRouter.exactInputSingle(params);
+
     }
+
+    function testPermitSwapGHOForETH3(
+        uint256 amountIn,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) public returns (uint256 amountOut) {
+        ghoToken.permit(msg.sender, address(this), amountIn, deadline, v, r, s);
+        TransferHelper.safeTransferFrom(ghoTokenAddress, msg.sender, address(this), amountIn);
+        TransferHelper.safeApprove(ghoTokenAddress, address(swapRouter), amountIn);
+
+        // Approve the router to spend GHO
+        ISwapRouter.ExactInputSingleParams memory params =
+            ISwapRouter.ExactInputSingleParams({
+                tokenIn: ghoTokenAddress,
+                tokenOut: wethAddress,
+                fee: poolFee,
+                recipient: address(this),
+                deadline: block.timestamp,
+                amountIn: amountIn,
+                amountOutMinimum: 0,
+                sqrtPriceLimitX96: 0
+            });
+
+        // Execute the swap to get WETH
+        amountOut = router.exactInputSingle(params);
+
+    }
+
 
     function mint(
         uint64 destinationChainSelector,
@@ -138,7 +172,7 @@ contract SwapSourceMinter is Withdraw {
         bytes32 s
 
     ) external {
-        IERC20Permit(ghoTokenAddress).permit(msg.sender, address(this), ghoAmount, deadline, v, r, s);
+        ghoToken.permit(msg.sender, address(this), ghoAmount, deadline, v, r, s);
         // Swap GHO for ETH
         swapGHOForETH(ghoAmount);
 
