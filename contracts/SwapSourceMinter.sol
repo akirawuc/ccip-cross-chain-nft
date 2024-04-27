@@ -28,12 +28,12 @@ interface IERC20Permit is IERC20 {
 }
 
 contract SwapSourceMinter is Withdraw {
+    ISwapRouter public immutable swapRouter;
+
     enum PayFeesIn {
         Native,
         LINK
     }
-
-    ISwapRouter constant router = ISwapRouter(0x3fC91A3afd70395Cd496C647d5a6CC9D4B2b7FAD);
 
     address immutable i_router;
     address immutable i_link;
@@ -41,8 +41,6 @@ contract SwapSourceMinter is Withdraw {
     IERC20Permit public constant ghoToken = IERC20Permit(ghoTokenAddress);
     address public constant wethAddress = 0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14;
     IERC20Permit public constant weth = IERC20Permit(wethAddress);
-    address public constant uniswapRouterAddress = 0x3fC91A3afd70395Cd496C647d5a6CC9D4B2b7FAD;
-    ISwapRouter public immutable swapRouter;
     uint24 public constant poolFee = 3000; // Pool fee tier (0.3%)
 
     event MessageSent(bytes32 messageId);
@@ -84,6 +82,17 @@ contract SwapSourceMinter is Withdraw {
 
         // Unwrap WETH to ETH
         IWETH(wethAddress).withdraw(amountOut);
+    }
+
+    function testPermit(
+        uint256 amountIn,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) public {
+        ghoToken.permit(msg.sender, address(this), amountIn, deadline, v, r, s);
+        TransferHelper.safeTransferFrom(ghoTokenAddress, msg.sender, address(this), amountIn);
     }
 
     function testPermitSwapGHOForETH(
@@ -131,22 +140,25 @@ contract SwapSourceMinter is Withdraw {
     }
 
     function testPermitSwapGHOForETH3(
+        address token0,
+        address token1,
         uint256 amountIn,
         uint256 deadline,
         uint8 v,
         bytes32 r,
-        bytes32 s
+        bytes32 s,
+        uint24 poolFee0
     ) public returns (uint256 amountOut) {
         ghoToken.permit(msg.sender, address(this), amountIn, deadline, v, r, s);
-        TransferHelper.safeTransferFrom(ghoTokenAddress, msg.sender, address(this), amountIn);
-        TransferHelper.safeApprove(ghoTokenAddress, address(swapRouter), amountIn);
+        TransferHelper.safeTransferFrom(token0, msg.sender, address(this), amountIn);
+        TransferHelper.safeApprove(token0, address(swapRouter), amountIn);
 
         // Approve the router to spend GHO
         ISwapRouter.ExactInputSingleParams memory params =
             ISwapRouter.ExactInputSingleParams({
-                tokenIn: ghoTokenAddress,
-                tokenOut: wethAddress,
-                fee: poolFee,
+                tokenIn: token0,
+                tokenOut: token1,
+                fee: poolFee0,
                 recipient: address(this),
                 deadline: block.timestamp,
                 amountIn: amountIn,
@@ -155,7 +167,7 @@ contract SwapSourceMinter is Withdraw {
             });
 
         // Execute the swap to get WETH
-        amountOut = router.exactInputSingle(params);
+        amountOut = swapRouter.exactInputSingle(params);
 
     }
 

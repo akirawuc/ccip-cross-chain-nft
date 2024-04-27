@@ -10,12 +10,15 @@ task(`deploy-swap`, `Deploys SwapSourceMinter.sol smart contract`)
     .addOptionalParam(`router`, `The address of the Router contract on the source blockchain`)
     .addOptionalParam(`uniswapRouter`, `The address of the Uniswap V3 Router contract`)
     .setAction(async (taskArguments: TaskArguments, hre: HardhatRuntimeEnvironment) => {
+        // 應該是deploy的時候有錯？
+        // See https://github.com/BuildBearLabs/UniswapV3/blob/main/scripts/deploy-Uniswap.js and modify as it.
         const routerAddress = taskArguments.router ? taskArguments.router : getRouterConfig(hre.network.name).address;
         const linkAddress = LINK_ADDRESSES[hre.network.name];
-        const uniswapRouterAddress = "0x3fC91A3afd70395Cd496C647d5a6CC9D4B2b7FAD";
+        const uniswapRouterAddress = "0xE592427A0AEce92De3Edee1F18E0157C05861564";
 
         const privateKey = getPrivateKey();
         const rpcProviderUrl = getProviderRpcUrl(hre.network.name);
+        console.log(`ℹ️  Using ${rpcProviderUrl} as the RPC provider URL for the ${hre.network.name} blockchain`);
 
         const provider = new ethers.JsonRpcProvider(rpcProviderUrl);
         const wallet = new Wallet(privateKey);

@@ -16,7 +16,7 @@ const config: HardhatUserConfig = {
   solidity: "0.8.19",
   networks: {
     hardhat: {
-      chainId: 31337
+      chainId: 11155111
     },
     ethereumSepolia: {
       url: ETHEREUM_SEPOLIA_RPC_URL !== undefined ? ETHEREUM_SEPOLIA_RPC_URL : '',

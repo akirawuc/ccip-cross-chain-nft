@@ -21,25 +21,15 @@ import type {
   TypedLogDescription,
   TypedListener,
   TypedContractMethod,
-} from "../../common";
+} from "../common";
 
-export interface SwapSourceMinterInterface extends Interface {
+export interface SourceMinterInterface extends Interface {
   getFunction(
     nameOrSignature:
       | "acceptOwnership"
-      | "ghoToken"
-      | "ghoTokenAddress"
       | "mint"
       | "owner"
-      | "poolFee"
-      | "swapRouter"
-      | "testPermit"
-      | "testPermitSwapGHOForETH"
-      | "testPermitSwapGHOForETH2"
-      | "testPermitSwapGHOForETH3"
       | "transferOwnership"
-      | "weth"
-      | "wethAddress"
       | "withdraw"
       | "withdrawToken"
   ): FunctionFragment;
@@ -55,64 +45,14 @@ export interface SwapSourceMinterInterface extends Interface {
     functionFragment: "acceptOwnership",
     values?: undefined
   ): string;
-  encodeFunctionData(functionFragment: "ghoToken", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "ghoTokenAddress",
-    values?: undefined
-  ): string;
   encodeFunctionData(
     functionFragment: "mint",
-    values: [
-      BigNumberish,
-      AddressLike,
-      AddressLike,
-      BigNumberish,
-      BigNumberish,
-      BigNumberish,
-      BigNumberish,
-      BytesLike,
-      BytesLike
-    ]
+    values: [BigNumberish, AddressLike, AddressLike, BigNumberish]
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
-  encodeFunctionData(functionFragment: "poolFee", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "swapRouter",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "testPermit",
-    values: [BigNumberish, BigNumberish, BigNumberish, BytesLike, BytesLike]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "testPermitSwapGHOForETH",
-    values: [BigNumberish, BigNumberish, BigNumberish, BytesLike, BytesLike]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "testPermitSwapGHOForETH2",
-    values: [BigNumberish, BigNumberish, BigNumberish, BytesLike, BytesLike]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "testPermitSwapGHOForETH3",
-    values: [
-      AddressLike,
-      AddressLike,
-      BigNumberish,
-      BigNumberish,
-      BigNumberish,
-      BytesLike,
-      BytesLike,
-      BigNumberish
-    ]
-  ): string;
   encodeFunctionData(
     functionFragment: "transferOwnership",
     values: [AddressLike]
-  ): string;
-  encodeFunctionData(functionFragment: "weth", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "wethAddress",
-    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "withdraw",
@@ -127,35 +67,10 @@ export interface SwapSourceMinterInterface extends Interface {
     functionFragment: "acceptOwnership",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "ghoToken", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "ghoTokenAddress",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "mint", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "poolFee", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "swapRouter", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "testPermit", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "testPermitSwapGHOForETH",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "testPermitSwapGHOForETH2",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "testPermitSwapGHOForETH3",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(
     functionFragment: "transferOwnership",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "weth", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "wethAddress",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
@@ -203,11 +118,11 @@ export namespace OwnershipTransferredEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
-export interface SwapSourceMinter extends BaseContract {
-  connect(runner?: ContractRunner | null): SwapSourceMinter;
+export interface SourceMinter extends BaseContract {
+  connect(runner?: ContractRunner | null): SourceMinter;
   waitForDeployment(): Promise<this>;
 
-  interface: SwapSourceMinterInterface;
+  interface: SourceMinterInterface;
 
   queryFilter<TCEvent extends TypedContractEvent>(
     event: TCEvent,
@@ -248,21 +163,12 @@ export interface SwapSourceMinter extends BaseContract {
 
   acceptOwnership: TypedContractMethod<[], [void], "nonpayable">;
 
-  ghoToken: TypedContractMethod<[], [string], "view">;
-
-  ghoTokenAddress: TypedContractMethod<[], [string], "view">;
-
   mint: TypedContractMethod<
     [
       destinationChainSelector: BigNumberish,
       nftAddress: AddressLike,
       receiver: AddressLike,
-      payFeesIn: BigNumberish,
-      ghoAmount: BigNumberish,
-      deadline: BigNumberish,
-      v: BigNumberish,
-      r: BytesLike,
-      s: BytesLike
+      payFeesIn: BigNumberish
     ],
     [void],
     "nonpayable"
@@ -270,70 +176,11 @@ export interface SwapSourceMinter extends BaseContract {
 
   owner: TypedContractMethod<[], [string], "view">;
 
-  poolFee: TypedContractMethod<[], [bigint], "view">;
-
-  swapRouter: TypedContractMethod<[], [string], "view">;
-
-  testPermit: TypedContractMethod<
-    [
-      amountIn: BigNumberish,
-      deadline: BigNumberish,
-      v: BigNumberish,
-      r: BytesLike,
-      s: BytesLike
-    ],
-    [void],
-    "nonpayable"
-  >;
-
-  testPermitSwapGHOForETH: TypedContractMethod<
-    [
-      amountIn: BigNumberish,
-      deadline: BigNumberish,
-      v: BigNumberish,
-      r: BytesLike,
-      s: BytesLike
-    ],
-    [void],
-    "nonpayable"
-  >;
-
-  testPermitSwapGHOForETH2: TypedContractMethod<
-    [
-      amountIn: BigNumberish,
-      deadline: BigNumberish,
-      v: BigNumberish,
-      r: BytesLike,
-      s: BytesLike
-    ],
-    [bigint],
-    "nonpayable"
-  >;
-
-  testPermitSwapGHOForETH3: TypedContractMethod<
-    [
-      token0: AddressLike,
-      token1: AddressLike,
-      amountIn: BigNumberish,
-      deadline: BigNumberish,
-      v: BigNumberish,
-      r: BytesLike,
-      s: BytesLike,
-      poolFee0: BigNumberish
-    ],
-    [bigint],
-    "nonpayable"
-  >;
-
   transferOwnership: TypedContractMethod<
     [to: AddressLike],
     [void],
     "nonpayable"
   >;
-
-  weth: TypedContractMethod<[], [string], "view">;
-
-  wethAddress: TypedContractMethod<[], [string], "view">;
 
   withdraw: TypedContractMethod<
     [beneficiary: AddressLike],
@@ -355,24 +202,13 @@ export interface SwapSourceMinter extends BaseContract {
     nameOrSignature: "acceptOwnership"
   ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
-    nameOrSignature: "ghoToken"
-  ): TypedContractMethod<[], [string], "view">;
-  getFunction(
-    nameOrSignature: "ghoTokenAddress"
-  ): TypedContractMethod<[], [string], "view">;
-  getFunction(
     nameOrSignature: "mint"
   ): TypedContractMethod<
     [
       destinationChainSelector: BigNumberish,
       nftAddress: AddressLike,
       receiver: AddressLike,
-      payFeesIn: BigNumberish,
-      ghoAmount: BigNumberish,
-      deadline: BigNumberish,
-      v: BigNumberish,
-      r: BytesLike,
-      s: BytesLike
+      payFeesIn: BigNumberish
     ],
     [void],
     "nonpayable"
@@ -381,75 +217,8 @@ export interface SwapSourceMinter extends BaseContract {
     nameOrSignature: "owner"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
-    nameOrSignature: "poolFee"
-  ): TypedContractMethod<[], [bigint], "view">;
-  getFunction(
-    nameOrSignature: "swapRouter"
-  ): TypedContractMethod<[], [string], "view">;
-  getFunction(
-    nameOrSignature: "testPermit"
-  ): TypedContractMethod<
-    [
-      amountIn: BigNumberish,
-      deadline: BigNumberish,
-      v: BigNumberish,
-      r: BytesLike,
-      s: BytesLike
-    ],
-    [void],
-    "nonpayable"
-  >;
-  getFunction(
-    nameOrSignature: "testPermitSwapGHOForETH"
-  ): TypedContractMethod<
-    [
-      amountIn: BigNumberish,
-      deadline: BigNumberish,
-      v: BigNumberish,
-      r: BytesLike,
-      s: BytesLike
-    ],
-    [void],
-    "nonpayable"
-  >;
-  getFunction(
-    nameOrSignature: "testPermitSwapGHOForETH2"
-  ): TypedContractMethod<
-    [
-      amountIn: BigNumberish,
-      deadline: BigNumberish,
-      v: BigNumberish,
-      r: BytesLike,
-      s: BytesLike
-    ],
-    [bigint],
-    "nonpayable"
-  >;
-  getFunction(
-    nameOrSignature: "testPermitSwapGHOForETH3"
-  ): TypedContractMethod<
-    [
-      token0: AddressLike,
-      token1: AddressLike,
-      amountIn: BigNumberish,
-      deadline: BigNumberish,
-      v: BigNumberish,
-      r: BytesLike,
-      s: BytesLike,
-      poolFee0: BigNumberish
-    ],
-    [bigint],
-    "nonpayable"
-  >;
-  getFunction(
     nameOrSignature: "transferOwnership"
   ): TypedContractMethod<[to: AddressLike], [void], "nonpayable">;
-  getFunction(
-    nameOrSignature: "weth"
-  ): TypedContractMethod<[], [string], "view">;
-  getFunction(
-    nameOrSignature: "wethAddress"
-  ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "withdraw"
   ): TypedContractMethod<[beneficiary: AddressLike], [void], "nonpayable">;

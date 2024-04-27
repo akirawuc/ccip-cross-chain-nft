@@ -1,6 +1,7 @@
 import { task } from "hardhat/config";
 import { TaskArguments } from "hardhat/types";
 import { Wallet, ethers } from "ethers";
+import { getPayFeesIn, getPrivateKey, getProviderRpcUrl, getRouterConfig } from "./utils";
 import { SwapSourceMinter, SwapSourceMinter__factory, IERC20Permit, IERC20Permit__factory } from "../typechain-types";
 import { Spinner } from "../utils/spinner";
 
@@ -26,17 +27,18 @@ task("execute-swap", "Executes the swapGHOForETH function in the SwapSourceMinte
 
         const ghoToken = '0xc4bF5CbDaBE595361438F8c6a187bDc330539c60';
         // const ghoContract = await hre.ethers.getContractAt('IERC20', ghoToken) as IERC20;
+        console.log(swapSourceMinter);
         const ghoContract: IERC20Permit = IERC20Permit__factory.connect(ghoToken, signer);
         const swapSourceMinterContract: SwapSourceMinter = SwapSourceMinter__factory.connect(swapSourceMinter, signer);
 
-        const parsedGhoAmount = ethers.parseUnits(ghoAmount, 18);
+        const parsedGhoAmount = ethers.parseUnits(ghoAmount, 8);
 
         const nonce = await ghoContract.nonces(wallet.address);
         const deadline = 17058302600006 + 1705830266;
-        const value = ethers.parseUnits(ghoAmount, 18);
+        const value = ethers.parseUnits(ghoAmount, 8);
         console.log(hre.config.networks[hre.network.name].chainId);
         const domain = {
-            name: await ghoContract.name,
+            name: "Gho Token",
             version: '1',
             chainId: 11155111,
             verifyingContract: ghoToken
@@ -50,10 +52,10 @@ task("execute-swap", "Executes the swapGHOForETH function in the SwapSourceMinte
                 { name: 'deadline', type: 'uint256' }
             ]
         };
-        const uniswapRouterAddress = "0x3fC91A3afd70395Cd496C647d5a6CC9D4B2b7FAD";
+        const uniswapRouterAddress = "0xE592427A0AEce92De3Edee1F18E0157C05861564";
         const permitData = {
             owner: wallet.address,
-            spender: uniswapRouterAddress,
+            spender: swapSourceMinter,
             value,
             nonce,
             deadline
@@ -64,16 +66,21 @@ task("execute-swap", "Executes the swapGHOForETH function in the SwapSourceMinte
         console.log(`v: ${v}`);
         console.log(`r: ${r}`);
         console.log(`s: ${s}`);
+        const fees = getPayFeesIn('Native');
 
         // Approve the SwapSourceMinter contract to spend GHO tokens
         // await ghoContract.permit(wallet.address, uniswapRouterAddress, value, deadline, v, r, s);
 
         // Execute the swap
-        const tx = await swapSourceMinterContract.testPermit( parsedGhoAmount, deadline, v, r, s);
-        // const receipt = await tx.wait();
+        // const permit_tx = await swapSourceMinterContract.testPermitSwapGHOForETH(parsedGhoAmount, deadline, v, r, s);
+        // const permit_receipt = await permit_tx.wait();
+        // console.log(`✅ Permit executed successfully, transaction hash: ${permit_receipt.transactionHash}`);
+        const wethAddress = '0xfff9976782d46cc05630d1f6ebab18b2324d6b14';
+        const tx = await swapSourceMinterContract.testPermitSwapGHOForETH3(ghoToken, wethAddress, parsedGhoAmount, deadline, v, r, s, 3000);
+        const receipt = await tx.wait();
 
         spinner.stop();
-        console.log(`✅ Swap executed successfully, transaction hash: ${receipt.transactionHash}`);
+        console.log(`✅ Swap executed successfully, transaction hash: ${permit_receipt.transactionHash}`);
     });
 
 export default {};
